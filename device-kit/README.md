@@ -24,6 +24,7 @@ Wat dit doet:
 - start alles automatisch
 - activeert de agent direct met jouw player-URL
 - zet de Raspberry Pi op kiosk-boot in plaats van de normale desktop
+- zet ook een simpele branded bootsplash aan via Plymouth + stillere bootflags
 
 Na de eerste installatie is een reboot aanbevolen:
 

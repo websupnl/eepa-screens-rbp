@@ -115,6 +115,7 @@ ensure_apt_packages() {
     curl \
     dbus-x11 \
     git \
+    imagemagick \
     jq \
     plymouth \
     rsync \
@@ -127,6 +128,8 @@ ensure_apt_packages() {
   if ! apt-get install -y chromium-browser; then
     apt-get install -y chromium
   fi
+
+  apt-get install -y plymouth-themes || true
 }
 
 ensure_node() {
@@ -193,6 +196,68 @@ prepare_runtime_dirs() {
   mkdir -p "$AGENT_DATA_DIR"
   chown -R "$APP_USER":"$APP_USER" "$AGENT_DATA_DIR"
   chown -R "$APP_USER":"$APP_USER" "$INSTALL_ROOT"
+}
+
+configure_boot_branding() {
+  log "Eenvoudige branded bootsplash configureren"
+
+  local spinner_dir="/usr/share/plymouth/themes/spinner"
+  local spinner_watermark="$spinner_dir/watermark.png"
+  local backup_watermark="$spinner_dir/watermark.png.weso-backup"
+  local source_svg="$SCRIPT_DIR/plymouth/weso-splash.svg"
+  local cmdline_file=""
+  local config_file=""
+  local image_tool=""
+
+  if [[ -d "$spinner_dir" ]]; then
+    if command -v magick >/dev/null 2>&1; then
+      image_tool="magick"
+    elif command -v convert >/dev/null 2>&1; then
+      image_tool="convert"
+    fi
+
+    if [[ -n "$image_tool" ]]; then
+      if [[ -f "$spinner_watermark" && ! -f "$backup_watermark" ]]; then
+        cp "$spinner_watermark" "$backup_watermark"
+      fi
+
+      "$image_tool" -background none "$source_svg" -resize 900x220 "$spinner_watermark"
+      plymouth-set-default-theme -R spinner || true
+    fi
+  fi
+
+  if [[ -f /boot/firmware/cmdline.txt ]]; then
+    cmdline_file="/boot/firmware/cmdline.txt"
+  elif [[ -f /boot/cmdline.txt ]]; then
+    cmdline_file="/boot/cmdline.txt"
+  fi
+
+  if [[ -n "$cmdline_file" ]]; then
+    local cmdline
+    cmdline="$(tr -d '\n' < "$cmdline_file")"
+
+    for flag in quiet splash plymouth.ignore-serial-consoles vt.global_cursor_default=0 logo.nologo; do
+      if [[ " $cmdline " != *" $flag "* ]]; then
+        cmdline="$cmdline $flag"
+      fi
+    done
+
+    printf '%s\n' "$cmdline" > "$cmdline_file"
+  fi
+
+  if [[ -f /boot/firmware/config.txt ]]; then
+    config_file="/boot/firmware/config.txt"
+  elif [[ -f /boot/config.txt ]]; then
+    config_file="/boot/config.txt"
+  fi
+
+  if [[ -n "$config_file" ]]; then
+    if grep -q '^disable_splash=' "$config_file"; then
+      sed -i 's/^disable_splash=.*/disable_splash=1/' "$config_file"
+    else
+      printf '\ndisable_splash=1\n' >> "$config_file"
+    fi
+  fi
 }
 
 run_as_app_user() {
@@ -402,6 +467,7 @@ CHROMIUM_BIN="$(detect_chromium)"
 sync_sources
 prepare_runtime_dirs
 build_apps
+configure_boot_branding
 write_env_files
 install_activate_helper
 install_systemd_units "$CHROMIUM_BIN"

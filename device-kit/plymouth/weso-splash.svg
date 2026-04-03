@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="400" viewBox="0 0 1600 400">
+  <rect width="1600" height="400" fill="#0a0a0f"/>
+  <g transform="translate(800 178)">
+    <text
+      x="0"
+      y="0"
+      text-anchor="middle"
+      fill="#f6f7f8"
+      font-family="Arial, Helvetica, sans-serif"
+      font-size="138"
+      font-weight="700"
+      letter-spacing="-10"
+    >
+      WESO
+    </text>
+    <text
+      x="0"
+      y="78"
+      text-anchor="middle"
+      fill="rgba(246,247,248,0.6)"
+      font-family="Arial, Helvetica, sans-serif"
+      font-size="34"
+      font-weight="600"
+      letter-spacing="10"
+    >
+      SECURE SCREEN PLAYER
+    </text>
+    <circle cx="0" cy="126" r="10" fill="#c1f7e2"/>
+  </g>
+</svg>
