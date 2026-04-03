@@ -173,15 +173,15 @@ build_apps() {
   log "Agent dependencies installeren"
   (
     cd "$INSTALL_ROOT/agent"
-    npm ci
-    npm run build
+    run_as_app_user npm ci
+    run_as_app_user npm run build
   )
 
   log "Player dependencies installeren"
   (
     cd "$INSTALL_ROOT/player"
-    npm ci
-    npm run build
+    run_as_app_user npm ci
+    run_as_app_user npm run build
   )
 }
 
@@ -190,6 +190,15 @@ prepare_runtime_dirs() {
   mkdir -p "$AGENT_DATA_DIR"
   chown -R "$APP_USER":"$APP_USER" "$AGENT_DATA_DIR"
   chown -R "$APP_USER":"$APP_USER" "$INSTALL_ROOT"
+}
+
+run_as_app_user() {
+  if [[ "$(id -un)" == "$APP_USER" ]]; then
+    "$@"
+    return
+  fi
+
+  sudo -u "$APP_USER" -H "$@"
 }
 
 write_env_files() {
@@ -380,8 +389,8 @@ ensure_apt_packages
 ensure_node
 CHROMIUM_BIN="$(detect_chromium)"
 sync_sources
-build_apps
 prepare_runtime_dirs
+build_apps
 write_env_files
 install_activate_helper
 install_systemd_units "$CHROMIUM_BIN"

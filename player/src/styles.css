@@ -486,6 +486,23 @@ video {
   background: var(--mint);
 }
 
+.playback-screen__progress-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 0.32rem;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.playback-screen__progress-bar {
+  height: 100%;
+  width: 0;
+  background: rgba(193, 247, 226, 0.92);
+  box-shadow: 0 0 18px rgba(193, 247, 226, 0.26);
+  transition: width 0.1s linear;
+}
+
 @keyframes dotBounce {
   0%,
   80%,

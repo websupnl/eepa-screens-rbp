@@ -83,8 +83,11 @@ export default function App() {
   const [status, setStatus] = useState<AgentStateResponse>(initialState);
   const [content, setContent] = useState<AgentContentResponse>(initialContent);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [progress, setProgress] = useState(0);
 
   const itemTimerRef = useRef<number | null>(null);
+  const progressTimerRef = useRef<number | null>(null);
+  const currentIndexRef = useRef(0);
 
   const orderedItems = useMemo(
     () => [...content.items].sort((a, b) => a.orderIndex - b.orderIndex),
@@ -93,6 +96,10 @@ export default function App() {
 
   const activeItem = orderedItems[currentIndex] ?? null;
   const activeSrc = activeItem ? resolveMediaUrl(activeItem.src) ?? resolveMediaUrl(activeItem.fallbackSrc) : null;
+
+  useEffect(() => {
+    currentIndexRef.current = currentIndex;
+  }, [currentIndex]);
 
   useEffect(() => {
     let cancelled = false;
@@ -114,6 +121,21 @@ export default function App() {
         if (!cancelled) {
           setStatus(nextState);
           setContent(nextContent);
+          setCurrentIndex((previous) => {
+            if (nextContent.items.length === 0) {
+              return 0;
+            }
+
+            const nextOrderedItems = [...nextContent.items].sort((a, b) => a.orderIndex - b.orderIndex);
+            const currentItemId = orderedItems[currentIndexRef.current]?.id ?? null;
+
+            if (!currentItemId) {
+              return Math.min(previous, nextOrderedItems.length - 1);
+            }
+
+            const matchedIndex = nextOrderedItems.findIndex((item) => item.id === currentItemId);
+            return matchedIndex >= 0 ? matchedIndex : Math.min(previous, nextOrderedItems.length - 1);
+          });
         }
       } catch {
         if (!cancelled) {
@@ -130,6 +152,8 @@ export default function App() {
             pairingUrl: null,
           });
           setContent(initialContent);
+          setCurrentIndex(0);
+          setProgress(0);
         }
       }
     }
@@ -156,27 +180,59 @@ export default function App() {
       window.clearTimeout(itemTimerRef.current);
       itemTimerRef.current = null;
     }
+    if (progressTimerRef.current) {
+      window.clearInterval(progressTimerRef.current);
+      progressTimerRef.current = null;
+    }
 
-    if (!activeItem || status.state !== 'playing' || activeItem.type === 'video') {
+    if (!activeItem || status.state !== 'playing') {
+      setProgress(0);
       return;
+    }
+
+    const durationMs = Math.max(activeItem.duration, 1) * 1000;
+    const startTime = Date.now();
+
+    setProgress(0);
+
+    progressTimerRef.current = window.setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const nextProgress = Math.min(100, (elapsed / durationMs) * 100);
+      setProgress(nextProgress);
+    }, 100);
+
+    if (activeItem.type === 'video') {
+      return () => {
+        if (progressTimerRef.current) {
+          window.clearInterval(progressTimerRef.current);
+          progressTimerRef.current = null;
+        }
+      };
     }
 
     itemTimerRef.current = window.setTimeout(() => {
       setCurrentIndex((previous) => (orderedItems.length === 0 ? 0 : (previous + 1) % orderedItems.length));
-    }, activeItem.duration * 1000);
+    }, durationMs);
 
     return () => {
       if (itemTimerRef.current) {
         window.clearTimeout(itemTimerRef.current);
         itemTimerRef.current = null;
       }
+      if (progressTimerRef.current) {
+        window.clearInterval(progressTimerRef.current);
+        progressTimerRef.current = null;
+      }
     };
-  }, [activeItem, orderedItems.length, status.state]);
+  }, [activeItem?.duration, activeItem?.id, activeItem?.type, orderedItems.length, status.state]);
 
   useEffect(() => {
     return () => {
       if (itemTimerRef.current) {
         window.clearTimeout(itemTimerRef.current);
+      }
+      if (progressTimerRef.current) {
+        window.clearInterval(progressTimerRef.current);
       }
     };
   }, []);
@@ -190,8 +246,10 @@ export default function App() {
           name: activeItem.name,
           src: activeSrc,
         }}
+        progress={progress}
         offlineMode={content.offlineMode}
         onEnded={() => {
+          setProgress(0);
           setCurrentIndex((previous) => (orderedItems.length === 0 ? 0 : (previous + 1) % orderedItems.length));
         }}
       />

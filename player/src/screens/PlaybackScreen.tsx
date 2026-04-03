@@ -7,11 +7,12 @@ type PlaybackItem = {
 
 type Props = {
   item: PlaybackItem;
+  progress: number;
   offlineMode: boolean;
   onEnded: () => void;
 };
 
-export function PlaybackScreen({ item, offlineMode, onEnded }: Props) {
+export function PlaybackScreen({ item, progress, offlineMode, onEnded }: Props) {
   return (
     <main className="playback-screen">
       <section className="playback-screen__stage">
@@ -29,6 +30,10 @@ export function PlaybackScreen({ item, offlineMode, onEnded }: Props) {
           />
         )}
       </section>
+
+      <div className="playback-screen__progress-track" aria-hidden="true">
+        <div className="playback-screen__progress-bar" style={{ width: `${progress}%` }} />
+      </div>
 
       {offlineMode ? (
         <div className="playback-screen__indicator">
