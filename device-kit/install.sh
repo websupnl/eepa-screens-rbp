@@ -2,7 +2,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 TEMPLATE_DIR="$SCRIPT_DIR/templates"
 
 INSTALL_ROOT="${INSTALL_ROOT:-/opt/weso}"
@@ -29,10 +29,10 @@ fail() {
 usage() {
   cat <<'EOF'
 Gebruik:
-  sudo bash ./raspberry-pi/device-kit/install.sh --player-url "https://jouwdomein/player/<screenId>?token=<token>"
+  sudo bash ./device-kit/install.sh --player-url "https://jouwdomein/player/<screenId>?token=<token>"
 
 Of handmatig:
-  sudo bash ./raspberry-pi/device-kit/install.sh \
+  sudo bash ./device-kit/install.sh \
     --backend-url "https://jouwdomein.nl" \
     --screen-id "<uuid>" \
     --device-token "<token>"

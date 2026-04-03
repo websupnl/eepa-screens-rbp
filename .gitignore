@@ -1,0 +1,6 @@
+agent/node_modules/
+agent/dist/
+agent/data/
+player/node_modules/
+player/dist/
+player/tsconfig.tsbuildinfo

@@ -11,7 +11,7 @@ Doel:
 Snelste flow op de Pi:
 
 ```bash
-sudo bash ./raspberry-pi/device-kit/install.sh \
+sudo bash ./device-kit/install.sh \
   --player-url "https://jouwdomein.nl/player/<screenId>?token=<deviceToken>"
 ```
 
@@ -47,7 +47,7 @@ Opties:
 Handmatige activatie kan ook:
 
 ```bash
-sudo bash ./raspberry-pi/device-kit/install.sh \
+sudo bash ./device-kit/install.sh \
   --backend-url "https://jouwdomein.nl" \
   --screen-id "<uuid>" \
   --device-token "<token>"
