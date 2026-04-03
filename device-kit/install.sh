@@ -113,9 +113,12 @@ ensure_apt_packages() {
   apt-get install -y \
     ca-certificates \
     curl \
+    dbus-x11 \
     git \
     jq \
+    plymouth \
     rsync \
+    xinit \
     xdg-utils \
     xserver-xorg \
     x11-xserver-utils \
@@ -221,11 +224,14 @@ render_template() {
   local target="$2"
   local chromium_bin="$3"
   local home_dir
+  local app_uid
 
   home_dir="$(getent passwd "$APP_USER" | cut -d: -f6)"
+  app_uid="$(id -u "$APP_USER")"
 
   sed \
     -e "s|__APP_USER__|$APP_USER|g" \
+    -e "s|__APP_UID__|$app_uid|g" \
     -e "s|__INSTALL_ROOT__|$INSTALL_ROOT|g" \
     -e "s|__AGENT_PORT__|$AGENT_PORT|g" \
     -e "s|__PLAYER_PORT__|$PLAYER_PORT|g" \
@@ -251,6 +257,11 @@ install_systemd_units() {
   systemctl restart weso-agent.service weso-player.service
 
   if [[ "$SKIP_KIOSK" -eq 0 ]]; then
+    systemctl set-default multi-user.target
+    if systemctl list-unit-files | grep -q '^display-manager.service'; then
+      systemctl disable display-manager.service || true
+      systemctl stop display-manager.service || true
+    fi
     systemctl enable weso-kiosk.service
     systemctl restart weso-kiosk.service
   fi

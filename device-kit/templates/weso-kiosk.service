@@ -1,17 +1,25 @@
 [Unit]
 Description=WESO Chromium Kiosk
-After=graphical.target weso-player.service
-Wants=graphical.target
+After=multi-user.target network-online.target weso-player.service
+Wants=network-online.target weso-player.service
 
 [Service]
 Type=simple
 User=__APP_USER__
-Environment=DISPLAY=:0
-Environment=XAUTHORITY=__HOME_DIR__/.Xauthority
-ExecStartPre=/usr/bin/bash -lc 'until curl -fsS http://127.0.0.1:__PLAYER_PORT__ >/dev/null; do sleep 2; done'
-ExecStart=__CHROMIUM_BIN__ --kiosk --app=http://127.0.0.1:__PLAYER_PORT__ --noerrdialogs --disable-infobars --disable-session-crashed-bubble --check-for-update-interval=31536000
+PAMName=login
+TTYPath=/dev/tty1
+TTYReset=yes
+TTYVHangup=yes
+TTYVTDisallocate=yes
+StandardInput=tty-force
+StandardOutput=journal
+StandardError=journal
+Environment=HOME=__HOME_DIR__
+Environment=XDG_RUNTIME_DIR=/run/user/__APP_UID__
+WorkingDirectory=__INSTALL_ROOT__/device-kit
+ExecStart=/usr/bin/xinit /usr/bin/bash -lc 'xset -dpms; xset s off; xset s noblank; unclutter -idle 0.1 -root >/dev/null 2>&1 & exec __CHROMIUM_BIN__ --kiosk --app=file://__INSTALL_ROOT__/device-kit/boot-shell.html --noerrdialogs --disable-infobars --disable-session-crashed-bubble --check-for-update-interval=31536000 --disable-features=TranslateUI --autoplay-policy=no-user-gesture-required' -- :0 vt1 -keeptty -nocursor
 Restart=always
 RestartSec=5
 
 [Install]
-WantedBy=graphical.target
+WantedBy=multi-user.target

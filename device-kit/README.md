@@ -20,9 +20,16 @@ Wat dit doet:
 - installeert Node.js 20 als dat nodig is
 - kopieert `agent/` en `player/` naar `/opt/weso`
 - draait `npm ci` en build voor beide apps
-- maakt `systemd` services aan voor agent, player en Chromium kiosk
+- maakt `systemd` services aan voor agent, player en een kiosk-sessie zonder desktop GUI
 - start alles automatisch
 - activeert de agent direct met jouw player-URL
+- zet de Raspberry Pi op kiosk-boot in plaats van de normale desktop
+
+Na de eerste installatie is een reboot aanbevolen:
+
+```bash
+sudo reboot
+```
 
 Na installatie:
 - Agent: `http://localhost:3001`

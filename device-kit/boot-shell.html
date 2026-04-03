@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WESO Boot</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0a0a0f;
+        --text: #f6f7f8;
+        --muted: rgba(246, 247, 248, 0.54);
+        --mint: #c1f7e2;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Segoe UI", Inter, Arial, sans-serif;
+      }
+
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background:
+          radial-gradient(circle at 72% 18%, rgba(193, 247, 226, 0.18), transparent 24%),
+          radial-gradient(circle at 24% 76%, rgba(193, 247, 226, 0.1), transparent 28%),
+          linear-gradient(180deg, #0a0a0f 0%, #0d1116 100%);
+      }
+
+      .shell {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.6rem;
+        text-align: center;
+      }
+
+      .mark {
+        font-size: clamp(4rem, 8vw, 6.2rem);
+        font-weight: 800;
+        letter-spacing: -0.08em;
+      }
+
+      .spinner {
+        position: relative;
+        width: 7rem;
+        height: 7rem;
+      }
+
+      .spinner::before,
+      .spinner::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 999px;
+      }
+
+      .spinner::before {
+        border: 2px solid rgba(255, 255, 255, 0.09);
+      }
+
+      .spinner::after {
+        border: 3px solid transparent;
+        border-top-color: var(--mint);
+        animation: spin 1.2s linear infinite;
+      }
+
+      .title {
+        margin: 0;
+        font-size: clamp(2rem, 3vw, 2.8rem);
+        font-weight: 700;
+        letter-spacing: -0.05em;
+      }
+
+      .subtitle {
+        margin: 0;
+        font-size: 1.05rem;
+        color: var(--muted);
+      }
+
+      .status {
+        margin-top: 0.4rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        color: rgba(246, 247, 248, 0.34);
+      }
+
+      .status__dot {
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: 999px;
+        background: var(--mint);
+        animation: pulse 1.6s ease-in-out infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 0.45;
+          transform: scale(1);
+        }
+
+        50% {
+          opacity: 1;
+          transform: scale(1.18);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <div class="mark">WESO</div>
+      <div class="spinner" aria-hidden="true"></div>
+      <h1 class="title">Starting secure playback...</h1>
+      <p class="subtitle">Preparing local services and loading your branded player.</p>
+      <div class="status">
+        <span class="status__dot"></span>
+        <span>Launching device</span>
+      </div>
+    </main>
+
+    <script>
+      const playerUrl = 'http://127.0.0.1:3002';
+
+      async function tryOpenPlayer() {
+        try {
+          await fetch(playerUrl, { cache: 'no-store', mode: 'no-cors' });
+          window.location.replace(playerUrl);
+        } catch {
+          window.setTimeout(tryOpenPlayer, 1200);
+        }
+      }
+
+      window.setTimeout(tryOpenPlayer, 800);
+    </script>
+  </body>
+</html>
