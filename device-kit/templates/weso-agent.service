@@ -1,0 +1,16 @@
+[Unit]
+Description=WESO Raspberry Pi Agent
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=__APP_USER__
+WorkingDirectory=__INSTALL_ROOT__/agent
+EnvironmentFile=/etc/weso-agent.env
+ExecStart=/usr/bin/env npm run start
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

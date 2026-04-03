@@ -1,0 +1,17 @@
+[Unit]
+Description=WESO Chromium Kiosk
+After=graphical.target weso-player.service
+Wants=graphical.target
+
+[Service]
+Type=simple
+User=__APP_USER__
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=__HOME_DIR__/.Xauthority
+ExecStartPre=/usr/bin/bash -lc 'until curl -fsS http://127.0.0.1:__PLAYER_PORT__ >/dev/null; do sleep 2; done'
+ExecStart=__CHROMIUM_BIN__ --kiosk --app=http://127.0.0.1:__PLAYER_PORT__ --noerrdialogs --disable-infobars --disable-session-crashed-bubble --check-for-update-interval=31536000
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=graphical.target

@@ -1,0 +1,16 @@
+[Unit]
+Description=WESO Raspberry Pi Player UI
+After=network-online.target weso-agent.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=__APP_USER__
+WorkingDirectory=__INSTALL_ROOT__/player
+EnvironmentFile=/etc/weso-player.env
+ExecStart=/usr/bin/env npm run start -- --host 0.0.0.0 --port __PLAYER_PORT__ --strictPort
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
